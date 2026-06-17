@@ -1,0 +1,17 @@
+# Julia
+*.ji
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+
+# Julia package / notebooks / temp
+Manifest.toml
+.env
+/.vscode/
+/.ipynb_checkpoints/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
