@@ -215,16 +215,50 @@ end
 """
     advective_heat_by_water_flux(q_water, T_source, T_dest, cpw)
 
-Heat carried by a bidirectional water flux.
+Heat carried by a water flux.
 
-If q_water > 0, water moves from source to destination and carries source temperature.
-If q_water < 0, water moves from destination to source and carries destination temperature.
+Positive q_water means:
+    source -> destination
+
+Negative q_water means:
+    destination -> source
+
+The heat flux uses the temperature of the compartment where the moving
+water originates.
 """
 function advective_heat_by_water_flux(q_water, T_source, T_dest, cpw)
     if q_water > 0.0
         return cpw * T_source * q_water
     elseif q_water < 0.0
         return cpw * T_dest * q_water
+    else
+        return 0.0
+    end
+end
+
+"""
+    advective_heat_by_vapor_flux(q_vapor, T_source, T_dest, cpw)
+
+Heat carried by a vapor flux.
+
+Positive q_vapor means:
+    source -> destination
+
+Negative q_vapor means:
+    destination -> source
+
+The heat flux uses the temperature of the compartment where the moving
+vapor originates.
+
+Note:
+    This is sensible/advective heat carried by vapor mass, not latent heat.
+    Latent heat from evaporation/condensation should be handled separately.
+"""
+function advective_heat_by_vapor_flux(q_vapor, T_source, T_dest, cpw)
+    if q_vapor > 0.0
+        return cpw * T_source * q_vapor
+    elseif q_vapor < 0.0
+        return cpw * T_dest * q_vapor
     else
         return 0.0
     end
