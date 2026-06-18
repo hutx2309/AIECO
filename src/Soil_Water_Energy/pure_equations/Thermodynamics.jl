@@ -49,25 +49,36 @@ end
 
 
 """
-    convective_heat_water(water_flux, TK, cpw)
+    advective_heat_water(water_flux, TK, cpw)
 
 Heat carried by liquid water flux.
 
 Equation:
     H = cpw * T * W
 """
-@inline function convective_heat_water(water_flux::Real, TK::Real, cpw::Real)
+@inline function advective_heat_water(water_flux::Real, TK::Real, cpw::Real)
     return cpw * TK * water_flux
 end
 
 
 """
-    convective_heat_vapor(vapor_flux, TK, cpw)
+    advective_heat_vapor(vapor_flux, TK, cpw)
 
-Heat carried by vapor flux.
+Heat carried by moving vapor flux.
 
+Inputs:
+    vapor_flux : vapor water-equivalent volume/depth for current substep
+    TK         : temperature [K]
+    cpw        : water-equivalent heat capacity [MJ m⁻³ K⁻¹]
+
+Output:
+    heat carried by vapor flux [MJ] or [MJ m⁻²], consistent with vapor_flux
+
+Note:
+    This is not latent heat of evaporation. It is the sensible/enthalpy
+    content transported by vapor movement.
 """
-@inline function convective_heat_vapor(vapor_flux::Real, TK::Real, cpw::Real)
+@inline function advective_heat_vapor(vapor_flux::Real, TK::Real, cpw::Real)
     return cpw * TK * vapor_flux
 end
 

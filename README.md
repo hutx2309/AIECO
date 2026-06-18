@@ -4,4 +4,4 @@ A motherboard developed by Tongxi Hu (Colorado State University, 6-17-2026) afte
 
 AiECO: Toward a Community-Driven Hybrid AI–Process Modeling Platform for Next-Generation Ecosystem Science
 
-This modeling platform is aimed as a motheboard which include both classic soil, plant, microbe, numerical modules, but also include two modules, i.e., AI_datasets and AI_model. 
+This modeling platform is developed as a motheboard which include both physical modules (e.g., soil, plant, microbe, weather modules that described based first-principle) and AI modules (i.e., AI_datasets and AI_model). So the platform is highly modularized to enable code reuse, structural uncertainty quantification, community contribution, as well as model intercomparisons.
