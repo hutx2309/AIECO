@@ -11,6 +11,7 @@ Manifest.toml
 .env
 /.vscode/
 /.ipynb_checkpoints/
+/docs/build/
 
 # OS / editor junk
 .DS_Store
