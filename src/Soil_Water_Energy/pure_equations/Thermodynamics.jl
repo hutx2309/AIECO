@@ -8,6 +8,26 @@
 #   - not unpack structs
 #   - return values only
 # ============================================================
+"""
+
+Ref: 
+
+vapor presure to vapor density conversion: 
+VP_sat: vapor concentration (m3/m3) at saturation, i.e.,
+--5360*(3.661E-03 - 1/T): Clausius–Clapeyron form
+--0.61: 0.611 kPa at 0°C
+
+
+"""
+
+
+@inline function cal_SatVP_conc(T) 
+    VP_sat=2.173E-03/T*0.61*exp(5360.0*(3.661E-03-1.0/T))
+    return VP_sat  
+end
+
+
+
 
 """
     VP_at_psi(TK, ψ)

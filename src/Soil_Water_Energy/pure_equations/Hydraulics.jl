@@ -106,7 +106,8 @@ total_water_potential(ψ_matric, ψ_gravity, ψ_osmotic) =
     vapor_water_potential(ψ_matric, ψ_osmotic)
 
 Water potential used for vapor-equilibrium calculations.
-Gravity is omitted.
+Gravity is omitted because local vapor pressure and freezing point depression depend
+on local water chemical potential, not vertical gravitational potential.
 
 Equation:
     Ψ_vapor = ψ_matric + ψ_osmotic
@@ -235,6 +236,7 @@ function advective_heat_by_water_flux(q_water, T_source, T_dest, cpw)
         return 0.0
     end
 end
+
 
 """
     advective_heat_by_vapor_flux(q_vapor, T_source, T_dest, cpw)
