@@ -178,41 +178,6 @@ function water_flux_from_potential(
     return conductance * (Ψ_source - Ψ_dest) * active_area * dt
 end
 
-
-"""
-    limit_positive_flux(q, source_available, destination_capacity)
-
-Limit a positive flux from source to destination.
-
-Positive q means:
-    source -> destination
-
-The constrained flux cannot exceed:
-    1. the raw flux q
-    2. water available in the source
-    3. pore/storage capacity in the destination
-"""
-function limit_positive_flux(q, source_available, destination_capacity)
-    return max(0.0, min(q, source_available, destination_capacity))
-end
-
-"""
-    limit_negative_flux(q, destination_available, source_capacity)
-
-Limit a negative flux from destination back to source.
-
-Negative q means:
-    destination -> source
-
-The constrained flux cannot be more negative than:
-    1. the raw flux q
-    2. water available in the destination
-    3. pore/storage capacity in the source
-"""
-function limit_negative_flux(q, destination_available, source_capacity)
-    return min(0.0, max(q, -destination_available, -source_capacity))
-end
-
 """
     advective_heat_by_water_flux(q_water, T_source, T_dest, cpw)
 

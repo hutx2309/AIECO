@@ -57,24 +57,22 @@ q_limited = max(0, min(q_potential, source_available, destination_capacity))
 If potential_flux is negative, this function returns 0.
 """
 function limit_positive_flux(
-potential_flux,
-source_available,
-destination_capacity
-)
-return max(
-0.0,
-min(
-potential_flux,
-max(0.0, source_available),
-max(0.0, destination_capacity)
-)
-)
+    potential_flux,
+    source_available,
+    destination_capacity
+    )
+    return max(
+        0.0,
+        min(
+            potential_flux,
+            max(0.0, source_available),
+            max(0.0, destination_capacity)
+        )
+    )
 end
 
 # -----------------------------------------------------------------------------
-
 # 2. One-direction negative flux limiter
-
 # -----------------------------------------------------------------------------
 
 """
@@ -108,24 +106,22 @@ q_limited = min(0, max(q_potential, -destination_available, -source_capacity))
 If potential_flux is positive, this function returns 0.
 """
 function limit_negative_flux(
-potential_flux,
-destination_available,
-source_capacity
-)
-return min(
-0.0,
-max(
-potential_flux,
--max(0.0, destination_available),
--max(0.0, source_capacity)
-)
-)
+    potential_flux,
+    destination_available,
+    source_capacity
+    )
+    return min(
+        0.0,
+        max(
+        potential_flux,
+        -max(0.0, destination_available),
+        -max(0.0, source_capacity)
+        )
+    )
 end
 
 # -----------------------------------------------------------------------------
-
 # 3. Bidirectional storage-capacity limiter
-
 # -----------------------------------------------------------------------------
 
 """
@@ -167,76 +163,31 @@ This helper is useful when the same potential flux can move in either
 direction, such as capillary exchange or vertical soil water redistribution.
 """
 function limit_bidirectional_flux(
-potential_flux,
-source_available,
-destination_capacity,
-destination_available,
-source_capacity
-)
-if potential_flux > 0.0
-return limit_positive_flux(
-potential_flux,
-source_available,
-destination_capacity
-)
-elseif potential_flux < 0.0
-return limit_negative_flux(
-potential_flux,
-destination_available,
-source_capacity
-)
-else
-return 0.0
-end
-end
-
-# -----------------------------------------------------------------------------
-
-# 4. Source-only limiter
-
-# -----------------------------------------------------------------------------
-
-"""
-limit_flux_by_source(
-potential_flux,
-source_available
-)
-
-Limit a one-way flux only by available source storage.
-
-This is useful when the receiving domain has no explicit capacity limit, or
-when capacity is handled elsewhere.
-
-For positive potential flux:
-
-```
-q_limited = min(q_potential, source_available)
-```
-
-For negative or zero potential flux:
-
-```
-q_limited = 0
-```
-
-"""
-function limit_flux_by_source(
-potential_flux,
-source_available
-)
-return max(
-0.0,
-min(
-potential_flux,
-max(0.0, source_available)
-)
-)
+    potential_flux,
+    source_available,
+    destination_capacity,
+    destination_available,
+    source_capacity
+    )
+    if potential_flux > 0.0
+    return limit_positive_flux(
+    potential_flux,
+    source_available,
+    destination_capacity
+    )
+    elseif potential_flux < 0.0
+    return limit_negative_flux(
+    potential_flux,
+    destination_available,
+    source_capacity
+    )
+    else
+    return 0.0
+    end
 end
 
 # -----------------------------------------------------------------------------
-
 # 5. Evaporation-style negative source limiter
-
 # -----------------------------------------------------------------------------
 
 """
@@ -261,61 +212,17 @@ unchanged. If you want condensation to be allowed but evaporation limited,
 this helper can be used directly.
 """
 function limit_negative_flux_by_source(
-potential_flux,
-source_available
-)
-return max(
-potential_flux,
--max(0.0, source_available)
-)
+    potential_flux,
+    source_available
+    )
+    return max(
+    potential_flux,
+    -max(0.0, source_available)
+    )
 end
 
 # -----------------------------------------------------------------------------
-
-# 6. Capacity-only limiter
-
-# -----------------------------------------------------------------------------
-
-"""
-limit_flux_by_capacity(
-potential_flux,
-destination_capacity
-)
-
-Limit a one-way positive flux only by destination capacity.
-
-This is useful when the source storage limit is handled elsewhere.
-
-For positive potential flux:
-
-```
-q_limited = min(q_potential, destination_capacity)
-```
-
-For negative or zero potential flux:
-
-```
-q_limited = 0
-```
-
-"""
-function limit_flux_by_capacity(
-potential_flux,
-destination_capacity
-)
-return max(
-0.0,
-min(
-potential_flux,
-max(0.0, destination_capacity)
-)
-)
-end
-
-# -----------------------------------------------------------------------------
-
 # 7. Fractional removal limiter
-
 # -----------------------------------------------------------------------------
 
 """
@@ -337,10 +244,10 @@ where XNPXX, XNPAX, etc. represent substep removal fractions.
 This helper is intentionally simple, but it makes flux limiters easier to read.
 """
 function removable_storage(
-storage,
-removal_fraction
-)
-return max(0.0, storage * removal_fraction)
+    storage,
+    removal_fraction
+    )
+    return max(0.0, storage * removal_fraction)
 end
 
 """
@@ -361,88 +268,12 @@ q_limited = max(q_potential, -max(0, storage * removal_fraction))
 This is useful for evaporation and vapor-condensation terms.
 """
 function limit_negative_flux_by_fractional_storage(
-potential_flux,
-storage,
-removal_fraction
-)
-return max(
-potential_flux,
--removable_storage(storage, removal_fraction)
-)
-end
-
-"""
-limit_positive_flux_by_fractional_storage(
-potential_flux,
-storage,
-removal_fraction,
-destination_capacity
-)
-
-Limit a positive flux by fractional source availability and destination capacity.
-
-Legacy form:
-
-```
-q_limited = max(
-    0,
-    min(
-        q_potential,
-        max(0, storage * removal_fraction),
-        destination_capacity
+    potential_flux,
+    storage,
+    removal_fraction
     )
-)
-```
-
-"""
-function limit_positive_flux_by_fractional_storage(
-potential_flux,
-storage,
-removal_fraction,
-destination_capacity
-)
-return limit_positive_flux(
-potential_flux,
-removable_storage(storage, removal_fraction),
-destination_capacity
-)
-end
-
-# -----------------------------------------------------------------------------
-
-# 8. Bounded diagnostic ratio
-
-# -----------------------------------------------------------------------------
-
-"""
-bounded_ratio(
-numerator,
-denominator;
-lower = 0.0,
-upper = 1.0,
-fallback = 0.0,
-tiny = tiny_num
-)
-
-Calculate a bounded ratio safely.
-
-This is useful for diagnostic fractions, partitioning weights, and cover
-fractions when the denominator may be very small.
-
-Do not use this to silently alter conserved water/energy amounts. It is meant
-for fractions and weights.
-"""
-function bounded_ratio(
-numerator,
-denominator;
-lower = 0.0,
-upper = 1.0,
-fallback = 0.0,
-tiny = tiny_num
-)
-if abs(denominator) > tiny
-return clamp(numerator / denominator, lower, upper)
-else
-return fallback
-end
+    return limit_negative_flux_by_source(
+        potential_flux,
+        removable_storage(storage, removal_fraction)
+    )
 end

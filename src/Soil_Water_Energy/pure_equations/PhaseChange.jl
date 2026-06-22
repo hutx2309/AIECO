@@ -58,14 +58,17 @@ EVAP = max(potential, -max(0, liquid_available * removal_fraction))
 where `removal_fraction` is usually XNPAX, XNPXX, etc.
 """
 function limit_evaporation_by_liquid(
-    potential_vapor_exchange,
-    liquid_available,
-    removal_fraction
+potential_vapor_exchange,
+liquid_available,
+removal_fraction
+)
+    # CODEX DEBUG BEGIN: delegate fractional-storage limiting to shared flux helper.
+    return limit_negative_flux_by_fractional_storage(
+        potential_vapor_exchange,
+        liquid_available,
+        removal_fraction,
     )
-    return max(
-    potential_vapor_exchange,
-    -max(0.0, liquid_available * removal_fraction)
-    )
+    # CODEX DEBUG END
 end
 
 """
@@ -110,21 +113,21 @@ function partition_vapor_exchange_liquid_solid(
     solid_available,
     removal_fraction
     )
-    liquid_vapor_exchange =
-    max(
-    potential_vapor_exchange,
-    -max(0.0, liquid_available * removal_fraction)
+    # CODEX DEBUG BEGIN: use shared fractional-storage limiter for liquid and solid phases.
+    liquid_vapor_exchange = limit_negative_flux_by_fractional_storage(
+        potential_vapor_exchange,
+        liquid_available,
+        removal_fraction,
     )
 
-    # CODEX DEBUG BEGIN: remove stray Markdown fence from executable function body.
     residual =
         min(0.0, potential_vapor_exchange - liquid_vapor_exchange)
 
-    solid_vapor_exchange =
-        max(
-            residual,
-            -max(0.0, solid_available * removal_fraction)
-        )
+    solid_vapor_exchange = limit_negative_flux_by_fractional_storage(
+        residual,
+        solid_available,
+        removal_fraction,
+    )
 
     residual_unmet_exchange =
         potential_vapor_exchange -
@@ -167,11 +170,11 @@ If positive, vapor storage exceeds equilibrium and condensation occurs.
 If negative, vapor storage is below equilibrium and evaporation/sublimation occurs.
 """
 function pore_vapor_condensation_potential(
-    vapor_storage,
-    equilibrium_vapor_concentration,
-    air_filled_volume
-    )
-    return vapor_storage - equilibrium_vapor_concentration * air_filled_volume
+vapor_storage,
+equilibrium_vapor_concentration,
+air_filled_volume
+)
+return vapor_storage - equilibrium_vapor_concentration * air_filled_volume
 end
 
 # -----------------------------------------------------------------------------
