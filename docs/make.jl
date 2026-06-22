@@ -67,6 +67,15 @@ module ScriptDocs
     module SurfaceExchange
         include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "pure_equations", "SurfaceExchange.jl"))
     end
+
+    module BoundaryFluxes
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "pure_equations", "BoundaryFluxes.jl"))
+    end
+
+    module StorageUpdates
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "pure_equations", "StorageUpdates.jl"))
+    end
+
 end
 
 const DOCUMENTED_MODULES = [
@@ -104,6 +113,8 @@ makedocs(
                     "Phase change" => "api/Soil_Water_Energy/pure_equations/PhaseChange.md",
                     "Radiation" => "api/Soil_Water_Energy/pure_equations/Radiation.md",
                     "Surface exchange" => "api/Soil_Water_Energy/pure_equations/SurfaceExchange.md",
+                    "Boundary Fluxes" => "api/Soil_Water_Energy/pure_equations/BoundaryFluxes.md",
+                    "Storage Updates" => "api/Soil_Water_Energy/pure_equations/StorageUpdates.md"
                 ],
             ],
         ],
