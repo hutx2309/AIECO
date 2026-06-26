@@ -11,12 +11,6 @@
 #   - no direct access to waterVar_copy
 #   - process functions call lower-level pure equations when useful
 # =============================================================================
-
-# CODEX DEBUG BEGIN: keep process outputs at the raw water-flux level so WF9 can apply storage limits before heat transport.
-# Advective heat remains a WF9 calling-site responsibility.
-# CODEX DEBUG END
-
-
 """
     water_table_layer_boundary_exchange(; kwargs...)
 

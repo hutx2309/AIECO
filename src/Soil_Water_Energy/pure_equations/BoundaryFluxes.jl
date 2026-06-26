@@ -16,7 +16,7 @@
 # 1. Surface excess water / ice above litter holding capacity
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 partition_surface_excess_liquid_ice(
 liquid_water,
 ice,
@@ -29,13 +29,14 @@ preserving the liquid:ice ratio.
 
 This represents the v2023 WF6 logic:
 
-```
-total = liquid + ice
-retained_liquid = liquid / total * holding_capacity
-retained_ice    = ice    / total * holding_capacity
-
-free_liquid = max(0, liquid - retained_liquid)
-free_ice    = max(0, ice    - retained_ice)
+```math
+\begin{aligned}
+W_t &= W_l + I \\
+W_{ret,l} &= \frac{W_l}{W_t}W_{hold} \\
+W_{ret,i} &= \frac{I}{W_t}W_{hold} \\
+W_{free,l} &= \max(0, W_l - W_{ret,l}) \\
+W_{free,i} &= \max(0, I - W_{ret,i})
+\end{aligned}
 ```
 
 Returns:
@@ -78,7 +79,7 @@ end
 # 2. Overland runoff from free surface liquid water
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 surface_overland_runoff(
 free_liquid,
 retention_capacity,
@@ -97,15 +98,15 @@ capacity.
 
 This captures the WF6 runoff pattern:
 
-```
-VX = free_liquid - retention_capacity
-D  = VX / surface_area
-R  = D / 2.828
-V  = R^0.67 * sqrt(slope) / roughness_scale
-Q  = V * D * flow_area * 3.6e3 * runoff_time_factor
-
-runoff = min(Q, VX * storage_removal_fraction,
-                available_liquid * storage_removal_fraction)
+```math
+\begin{aligned}
+V_X &= W_{free,l} - W_{ret} \\
+D &= \frac{V_X}{A_s} \\
+R_h &= \frac{D}{2.828} \\
+u &= \frac{R_h^{0.67}\sqrt{S}}{Z_M} \\
+Q &= uD A_f (3.6\times10^3)\Delta t_r \\
+Q_r &= \min(Q, V_X f_r, W_{avail,l}f_r)
+\end{aligned}
 ```
 
 Arguments:
@@ -181,7 +182,7 @@ end
 # 3. Wind redistribution of top snowpack material
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 wind_redistributed_top_snowpack(
 wind_speed,
 time_factor,
@@ -194,12 +195,14 @@ Calculate wind redistribution/removal of top snowpack material.
 
 Legacy WF6 pattern:
 
-```
-QSX = 1.0e-7 * wind_speed * XNPHX
-QSM = QSX * snow_volume
-QWM = QSX * liquid_water
-QIM = QSX * ice_volume
-QST = QSM + QWM + QIM
+```math
+\begin{aligned}
+Q_{SX} &= 10^{-7}u_{wind}\Delta t \\
+Q_{SM} &= Q_{SX}S \\
+Q_{WM} &= Q_{SX}W \\
+Q_{IM} &= Q_{SX}I \\
+Q_{ST} &= Q_{SM} + Q_{WM} + Q_{IM}
+\end{aligned}
 ```
 
 Returns:
@@ -233,14 +236,14 @@ function wind_redistributed_top_snowpack(
         ice_flux = ice_flux,
         total_flux = snow_flux + water_flux + ice_flux
     )
-    
+
 end
 
 # -----------------------------------------------------------------------------
 # 4. Runoff between adjacent grid cells
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 grid_to_grid_runoff_equilibrium(
 source_elevation,
 destination_elevation,
@@ -255,16 +258,13 @@ destination grid cell.
 
 This captures the WF7 expression:
 
-```
-QRQ = max(0,
-    ((ALT_source - ALT_dest) * A_source * A_dest
-     - S_source * A_source
-     + S_dest   * A_dest) /
-    (A_source + A_dest)
-)
+```math
+Q_{RQ} = \max\left(0,
+\frac{(z_s-z_d)A_sA_d - S_sA_s + S_dA_d}{A_s + A_d}
+\right)
 ```
 
-where S is surface water/ice storage and A is cell area.
+where `S` is surface water/ice storage and `A` is cell area.
 
 Returns:
 nonnegative equilibrium runoff
@@ -297,7 +297,7 @@ end
 # 5. Water-table and layer-fraction diagnostics
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 layer_fraction_below_depth(
 layer_bottom_depth,
 boundary_depth,
@@ -308,8 +308,8 @@ Calculate the fraction of a soil layer below a given boundary depth.
 
 Legacy pattern:
 
-```
-frac = min(1, max(0, (soil_Dep[L] - boundary_depth) / soil_cube[3,L]))
+```math
+f = \min\left(1, \max\left(0, \frac{z_{bottom} - z_b}{\Delta z}\right)\right)
 ```
 
 Returns:
@@ -332,7 +332,7 @@ function layer_fraction_below_depth(
     end
 end
 
-"""
+@doc raw"""
 macropore_water_depth(
 layer_bottom_depth,
 macropore_water,
@@ -346,9 +346,8 @@ Calculate the depth to the top of water/ice stored in the macropore domain.
 
 Legacy WF9 pattern:
 
-```
-DPTHH = soil_Dep[L] -
-        (soilW_Mac + soilIce_Mac) / soil_Macpore * soil_cube[3,L]
+```math
+z_M = z_{bottom} - \frac{W_M + I_M}{V_M}\Delta z
 ```
 
 If macropore volume is unavailable, return layer_bottom_depth.
@@ -378,7 +377,7 @@ end
 # 6. External-boundary surface runoff helpers
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 boundary_surface_runoff_flux(
 excess_surface_water_ice,
 area,
@@ -497,7 +496,7 @@ end
 # 7. Boundary-condition flags
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 external_surface_runoff_allowed(
 runoff_allowed_flag,
 runoff_condition,
@@ -542,7 +541,7 @@ end
 # 8. Water-table exchange helpers
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 hydrostatic_pressure_potential(
 layer_depth,
 water_table_depth;
@@ -552,20 +551,23 @@ hydraulic_gradient = 0.0098
 Calculate hydrostatic pressure potential relative to a water-table depth.
 
 The default hydraulic gradient is:
+
+```math
+g_h = 0.0098\ \mathrm{MPa\ m^{-1}}
 ```
-0.0098 MPa m⁻¹
-```
+
 which corresponds approximately to:
-```
-ρw * g = 1000 kg m⁻³ * 9.8 m s⁻²
-       = 9800 Pa m⁻¹
-       = 0.0098 MPa m⁻¹
+
+```math
+\rho_w g = 1000\ \mathrm{kg\ m^{-3}}\times 9.8\ \mathrm{m\ s^{-2}}
+= 9800\ \mathrm{Pa\ m^{-1}}
+= 0.0098\ \mathrm{MPa\ m^{-1}}
 ```
 
 Legacy WF9 pattern:
 
-```
-0.0098 * (soil_LyrDepMid[L] - Dep_WatTbl)
+```math
+\psi_h = 0.0098(z_L - z_{wt})
 ```
 Returns:
 pressure potential in the same units as soil water potential.
@@ -578,7 +580,7 @@ function hydrostatic_pressure_potential(
     return hydraulic_gradient * (layer_depth - water_table_depth)
 end
 
-"""
+@doc raw"""
 adjusted_water_table_depth(
 water_table_depth,
 saturation_potential;
@@ -587,10 +589,13 @@ hydraulic_gradient = 0.0098
 
 Calculate an adjusted/effective water-table depth from saturated water
 potential.
+
 Legacy WF9 pattern:
+
+```math
+z_{wt,x} = z_{wt} + \frac{\psi_{sat}}{0.0098}
 ```
-Dep_WatTblX = Dep_WatTbl + psi_soilSat / 0.0098
-```
+
 Returns:
 adjusted water-table depth
 """
@@ -602,7 +607,7 @@ function adjusted_water_table_depth(
     return water_table_depth + saturation_potential / hydraulic_gradient
 end
 
-"""
+@doc raw"""
 slope_pressure_adjustment(
 direction_sign,
 slope_component,
@@ -612,8 +617,13 @@ coefficient = 0.0049
 )
 
 Calculate slope-related pressure adjustment for lateral water-table exchange.
-0.005  for micropore discharge above natural/tile water table
-0.0049 for macropore discharge and recharge branches
+
+```math
+\Delta\psi_s = s_d c_s S L(1-S_{wt})
+```
+
+`c_s` is 0.005 for micropore discharge above natural/tile water table and
+0.0049 for macropore discharge and recharge branches.
 
 Returns:
 slope pressure adjustment
@@ -632,7 +642,7 @@ function slope_pressure_adjustment(
            (1.0 - water_table_slope)
 end
 
-"""
+@doc raw"""
 water_table_discharge_potential(
 matric_potential,
 osmotic_potential,
@@ -651,16 +661,12 @@ tile-drain boundary.
 This helper represents branches where the potential is constrained to be
 nonpositive:
 
-```
-potential = min(0, ...)
-```
-For macropore branches, use:
-
-```
-include_matric = false
+```math
+\psi_d = \min(0, \psi_b)
 ```
 
-because the legacy macropore expression usually omits `-PSISA1[L]`.
+For macropore branches, use `include_matric = false` because the legacy
+macropore expression usually omits `-PSISA1[L]`.
 
 Arguments:
 matric_potential          : soil matric potential, e.g., PSISA1[L]
@@ -709,7 +715,7 @@ function water_table_discharge_potential(
     return discharge_potential
 end
 
-"""
+@doc raw"""
 water_table_recharge_potential(
 matric_potential,
 osmotic_potential,
@@ -726,16 +732,12 @@ Calculate pressure potential for recharge from water table into soil.
 This helper represents branches where the potential is constrained to be
 nonnegative:
 
-```
-potential = max(0, ...)
-```
-For macropore branches, use:
-
-```
-include_matric = false
+```math
+\psi_r = \max(0, \psi_b)
 ```
 
-because the legacy macropore expression usually omits `-PSISA1[L]`.
+For macropore branches, use `include_matric = false` because the legacy
+macropore expression usually omits `-PSISA1[L]`.
 
 Returns:
 nonnegative recharge potential
@@ -773,7 +775,7 @@ function water_table_recharge_potential(
     return recharge_potential
 end
 
-"""
+@doc raw"""
 boundary_water_flux_from_potential(
 pressure_potential,
 hydraulic_conductivity,
@@ -785,6 +787,10 @@ time_factor
 )
 
 Convert a pressure potential into a boundary water flux.
+
+```math
+F_w = \frac{\psi_b K A f}{R + 1}\alpha_b\Delta t
+```
 
 This helper can be used for:
 - micropore discharge to natural water table

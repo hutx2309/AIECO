@@ -14,13 +14,16 @@
 # Surface cover fractions
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
     snow_cover_fraction(snow_depth, reference_depth)
 
 Calculate fractional snow cover from snow depth.
 
 Legacy equation:
-    f_snow = min(1, sqrt(max(0, snow_depth) / reference_depth))
+
+```math
+f_{snow} = \min\left(1, \sqrt{\frac{\max(0, d_{snow})}{d_{ref}}}\right)
+```
 
 Inputs:
     snow_depth      : snow depth
@@ -38,7 +41,7 @@ function snow_cover_fraction(snow_depth, reference_depth)
 end
 
 
-"""
+@doc raw"""
     snow_free_fraction(frac_snow_cover)
 
 Calculate snow-free surface fraction.
@@ -47,13 +50,16 @@ snow_free_fraction(frac_snow_cover) =
     1.0 - clamp(frac_snow_cover, 0.0, 1.0)
 
 
-"""
+@doc raw"""
     bare_ground_fraction(surface_litter_carbon, surface_area; coefficient=0.5e-2)
 
 Calculate bare-ground fraction from surface litter organic C + charcoal.
 
 Legacy equation:
-    frac_bare = min(1, max(0, exp(-0.5E-02 * litter_mass / area)))
+
+```math
+f_{bare} = \min\left(1, \max\left(0, \exp\left[-c\frac{M_{litter}}{A}\right]\right)\right)
+```
 
 Inputs:
     surface_litter_carbon : surf_SOC + surf_charcoal
@@ -76,16 +82,19 @@ function bare_ground_fraction(
 end
 
 
-"""
+@doc raw"""
     water_cover_fraction_from_excess(excess_water_ice, holding_capacity; tiny=tiny_num)
 
 Convert excess surface water/ice into a bounded surface-cover fraction.
 
-The raw ratio:
+The raw ratio is
 
-    excess_water_ice / holding_capacity
+```math
+r_w = \frac{W_{excess}}{W_{hold}}
+```
 
-can be larger than 1.0, but the surface-cover fraction cannot exceed 1.0.
+which can be larger than 1.0, but the surface-cover fraction cannot exceed
+1.0.
 
 Inputs:
     excess_water_ice : surface water + ice above litter holding capacity
@@ -107,20 +116,23 @@ function water_cover_fraction_from_excess(
 end
 
 
-"""
+@doc raw"""
     water_free_fraction(frac_bare_ground, water_cover_from_excess)
 
 Calculate water-free bare-ground fraction.
 
 Legacy equation:
-    frac_waterFree = max(0, frac_bareGrnd - water_cover_ratio)
+
+```math
+f_{waterfree} = \max(0, f_{bare} - f_{water})
+```
 """
 function water_free_fraction(frac_bare_ground, water_cover_from_excess)
     return max(0.0, frac_bare_ground - clamp(water_cover_from_excess, 0.0, 1.0))
 end
 
 
-"""
+@doc raw"""
     surface_fraction_partition(
         snow_depth,
         reference_snow_depth,
@@ -134,12 +146,14 @@ Diagnose snow-covered, snow-free, water-free, and water-covered surface fraction
 
 This groups the repeated WF1/WF2 logic:
 
-    frac_snowCover = snow_cover_fraction(...)
-    frac_snowFree  = 1 - frac_snowCover
-
-    water_cover_from_excess = clamp(excess / holding_capacity, 0, 1)
-    frac_waterFree  = max(0, frac_bare_ground - water_cover_from_excess)
-    frac_waterCover = 1 - frac_waterFree
+```math
+\begin{aligned}
+f_{snowfree} &= 1 - f_{snow} \\
+f_{water} &= \operatorname{clamp}\left(\frac{W_{excess}}{W_{hold}}, 0, 1\right) \\
+f_{waterfree} &= \max(0, f_{bare} - f_{water}) \\
+f_{watercover} &= 1 - f_{waterfree}
+\end{aligned}
+```
 
 Inputs:
     snow_depth                     : current snow depth
@@ -196,26 +210,32 @@ end
 # Resistance equations
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
     bounded_resistance(raw_resistance, lower_bound, upper_bound)
 
 Constrain a resistance value between lower and upper bounds.
 
 Useful for aerodynamic resistance limits such as:
-    min(r_max, max(r_min, raw_resistance))
+
+```math
+r = \min(r_{max}, \max(r_{min}, r_{raw}))
+```
 """
 function bounded_resistance(raw_resistance, lower_bound, upper_bound)
     return clamp(raw_resistance, lower_bound, upper_bound)
 end
 
 
-"""
+@doc raw"""
     stability_corrected_resistance(base_resistance, richardson_factor; tiny=tiny_num)
 
 Apply a Richardson/stability correction to a resistance.
 
 Legacy-style equation:
-    resistance = base_resistance / R
+
+```math
+r = \frac{r_0}{R}
+```
 
 where R is a Richardson/stability correction factor.
 """
@@ -231,14 +251,17 @@ function stability_corrected_resistance(
     end
 end
 
-"""
+@doc raw"""
     soil_surface_resistance(frac_water_free, r_soil, frac_water_cover, r_litter_water; tiny=tiny_num)
 
 Effective soil/litter surface resistance used for snow-free ground exchange.
 
 Legacy WF2 equation:
-    r_effective_surf = 1 / (frac_waterFree/r_grndAir2surf +
-                frac_waterCover/(r_grndAir2surf + r_littBondryLimit_L))
+
+```math
+r_{eff} = \left(\frac{f_{waterfree}}{r_s} +
+\frac{f_{watercover}}{r_s + r_l}\right)^{-1}
+```
 
 Inputs:
     frac_water_free            : water-free bare-ground fraction
@@ -263,7 +286,7 @@ end
 # -----------------------------------------------------------------------------
 # Exchange conductance equations
 # -----------------------------------------------------------------------------
-"""
+@doc raw"""
     vapor_exchange_coefficient(
         area,
         time_factor,
@@ -277,26 +300,26 @@ Integrated vapor-exchange coefficient for one model substep.
 
 Physical form:
 
-    E = (A * Δt * f * m / r_v) * (C_air - C_surface)
+```math
+E = \frac{A\Delta t\,f\,m}{r_v}(C_{air} - C_{surface})
+```
 
-where
-
-    E          = vapor/water exchange amount during the substep
-    A          = exchange area
-    Δt         = substep time factor
-    f          = active surface fraction
-    m          = optional multiplier, e.g. dt_snow or dt_litt
-    r_v        = vapor-transfer resistance
-    C_air      = vapor concentration in air
-    C_surface  = equilibrium vapor concentration at the surface
+where `E` is vapor or water exchange during the substep, `A` is exchange area,
+`\Delta t` is the substep time factor, `f` is active surface fraction, `m` is
+an optional multiplier, `r_v` is vapor-transfer resistance, and `C_{air} -
+C_{surface}` is the vapor concentration gradient.
 
 Therefore this function returns only the coefficient:
 
-    K_v = A * Δt * f * m / r_v
+```math
+K_v = \frac{A\Delta t\,f\,m}{r_v}
+```
 
 and the final vapor exchange is:
 
-    E = K_v * (C_air - C_surface)
+```math
+E = K_v(C_{air} - C_{surface})
+```
 
 Sign convention:
     positive E means vapor moves from air to surface;
@@ -316,8 +339,8 @@ function vapor_exchange_coefficient(
         return 0.0
     end
 end
- 
-"""
+
+@doc raw"""
     sensible_heat_exchange_coefficient(
         area,
         time_factor,
@@ -332,28 +355,26 @@ Integrated sensible-heat exchange coefficient for one model substep.
 
 Physical form:
 
-    H = (A * Δt * f * m * ρ_air * c_p_air / r_h) *
-        (T_air - T_surface)
+```math
+H = \frac{A\Delta t\,f\,m\,\rho_{air}c_{p,air}}{r_h}(T_{air} - T_{surface})
+```
 
-where
-
-    H          = sensible heat exchanged during the substep
-    A          = exchange area
-    Δt         = substep time factor
-    f          = active surface fraction
-    m          = optional multiplier, e.g. dt_snow or dt_litt
-    ρ_air c_p  = volumetric heat capacity of air
-    r_h        = heat-transfer resistance
-    T_air      = air temperature
-    T_surface  = surface temperature
+where `H` is sensible heat exchanged during the substep, `A` is exchange area,
+`\Delta t` is the substep time factor, `f` is active surface fraction, `m` is
+an optional multiplier, `\rho_{air}c_{p,air}` is volumetric heat capacity of
+air, and `r_h` is heat-transfer resistance.
 
 Therefore this function returns only the coefficient:
 
-    K_h = A * Δt * f * m * ρ_air * c_p_air / r_h
+```math
+K_h = \frac{A\Delta t\,f\,m\,\rho_{air}c_{p,air}}{r_h}
+```
 
 and the final sensible heat exchange is:
 
-    H = K_h * (T_air - T_surface)
+```math
+H = K_h(T_{air} - T_{surface})
+```
 
 The default air_volumetric_heat_capacity = 1.25e-3 is the legacy model value,
 approximately 0.00125 MJ m⁻³ K⁻¹.
@@ -378,4 +399,4 @@ function sensible_heat_exchange_coefficient(
     end
 end
 
- 
+

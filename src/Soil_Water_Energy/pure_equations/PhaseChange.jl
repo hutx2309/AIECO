@@ -30,7 +30,7 @@
 # 1. Vapor exchange limits
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 limit_evaporation_by_liquid(
 potential_vapor_exchange,
 liquid_available,
@@ -39,20 +39,14 @@ removal_fraction
 
 Limit vapor exchange by available liquid water.
 
-Physical meaning:
-
-```
-potential_vapor_exchange > 0:
-    condensation to surface; no liquid-water availability limit needed.
-
-potential_vapor_exchange < 0:
-    evaporation from surface; cannot evaporate more than available liquid water.
-```
+Physical meaning: positive vapor exchange is condensation to the surface and is
+not limited by liquid-water availability; negative vapor exchange is evaporation
+and cannot remove more than available liquid water.
 
 Legacy form:
 
-```
-EVAP = max(potential, -max(0, liquid_available * removal_fraction))
+```math
+E = \max\left(E_p, -\max(0, W_l f_r)\right)
 ```
 
 where `removal_fraction` is usually XNPAX, XNPXX, etc.
@@ -71,7 +65,7 @@ removal_fraction
     # CODEX DEBUG END
 end
 
-"""
+@doc raw"""
 partition_vapor_exchange_liquid_solid(
 potential_vapor_exchange,
 liquid_available,
@@ -86,21 +80,20 @@ first limited by available liquid water and then by available snow/ice.
 
 Legacy structure:
 
-```
-EVAPW = max(EVAPT, -max(0, liquid_available * removal_fraction))
-residual = min(0, EVAPT - EVAPW)
-EVAPS = max(residual, -max(0, solid_available * removal_fraction))
+```math
+\begin{aligned}
+E_w &= \max\left(E_p, -\max(0, W_l f_r)\right) \\
+E_{res} &= \min(0, E_p - E_w) \\
+E_s &= \max\left(E_{res}, -\max(0, W_s f_r)\right)
+\end{aligned}
 ```
 
 Physical meaning:
 positive potential exchange:
 condensation/deposition is assigned to liquid_vapor_exchange.
 
-```
-negative potential exchange:
-    evaporation uses liquid water first;
-    remaining vapor demand is supplied by sublimation from snow/ice.
-```
+For negative potential exchange, evaporation uses liquid water first; remaining
+vapor demand is supplied by sublimation from snow or ice.
 
 Returns a NamedTuple:
 liquid_vapor_exchange
@@ -143,7 +136,7 @@ function partition_vapor_exchange_liquid_solid(
 
 end
 
-"""
+@doc raw"""
 pore_vapor_condensation_potential(
 vapor_storage,
 equilibrium_vapor_concentration,
@@ -154,17 +147,12 @@ Potential vapor exchange inside an air-filled pore space.
 
 Physical form:
 
-```
-E_potential = V_vapor_current - C_eq * V_air
+```math
+E_p = V_v - C_{eq}V_{air}
 ```
 
-where
-
-```
-V_vapor_current = current vapor storage
-C_eq            = equilibrium vapor concentration
-V_air           = air-filled pore volume
-```
+where `V_v` is current vapor storage, `C_{eq}` is equilibrium vapor
+concentration, and `V_{air}` is air-filled pore volume.
 
 If positive, vapor storage exceeds equilibrium and condensation occurs.
 If negative, vapor storage is below equilibrium and evaporation/sublimation occurs.
@@ -183,7 +171,7 @@ end
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 freezing_temperature_from_water_potential(
 water_potential;
 latent_heat_fusion = 333.0
@@ -193,8 +181,8 @@ Freezing temperature modified by water potential.
 
 Legacy form used for litter and soil:
 
-```
-TFREEZ = -9.0959E+04 / (ψ - 333.0)
+```math
+T_{freeze} = \frac{-9.0959\times10^{4}}{\psi - 333.0}
 ```
 
 where ψ is water potential and 333.0 is the latent heat of fusion in the
@@ -218,7 +206,7 @@ end
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 freeze_thaw_is_active(
 temperature,
 freezing_temperature,
@@ -232,12 +220,11 @@ Determine whether freeze-thaw should occur.
 
 Legacy logic:
 
-```
-freezing can occur when:
-    T < T_freeze and liquid water is available
-
-thawing can occur when:
-    T > T_freeze and ice is available
+```math
+\begin{aligned}
+\text{freezing active} &\iff T < T_{freeze}\ \text{and liquid water is available} \\
+\text{thawing active} &\iff T > T_{freeze}\ \text{and ice is available}
+\end{aligned}
 ```
 
 The reference volume is used only to define a small numerical threshold.
@@ -268,7 +255,7 @@ end
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 freeze_thaw_heat_potential(
 heat_capacity,
 temperature,
@@ -283,20 +270,14 @@ Potential latent heat available for freeze-thaw.
 
 Legacy soil/litter form:
 
-```
-H_potential​=C * (Tfreeze​−T) /(1+6.2913*10−3*Tfreeze​)(1−aψ)* ​Δt
+```math
+H_p = \frac{C(T_{freeze}-T)}{(1 + 6.2913\times10^{-3}T_{freeze})(1-a\psi)}\Delta t
 ```
 
-where
-
-```
-C          = heat capacity of the water/ice-containing domain
-T_freeze   = effective freezing temperature
-T          = current temperature
-ψ          = water potential
-a          = water-potential coefficient, either 0.10 or 0.00 in your code
-Δt         = substep time factor
-```
+where `C` is heat capacity of the water/ice-containing domain, `T_{freeze}` is
+the effective freezing temperature, `T` is current temperature, `\psi` is water
+potential, `a` is the water-potential coefficient, and `\Delta t` is the substep
+time factor.
 
 Sign convention:
 positive H_potential:
@@ -333,7 +314,7 @@ function freeze_thaw_heat_potential(
 
 end
 
-"""
+@doc raw"""
 snow_freeze_thaw_heat_potential(
 heat_capacity,
 temperature,
@@ -344,8 +325,8 @@ snow_damping_factor = 2.7185
 
 Potential latent heat available for snowpack freeze-thaw.
 
-```
-H_potential = C * (273.15 - T) / 2.7185 * time_factor
+```math
+H_p = \frac{C(273.15 - T)}{2.7185}\Delta t
 ```
 
 Sign convention:
@@ -376,7 +357,7 @@ end
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 limit_freeze_thaw_heat(
 potential_latent_heat,
 liquid_water,
@@ -388,31 +369,22 @@ ice_density_factor = 1.0
 
 Limit freeze-thaw latent heat by available liquid water or ice.
 
-Physical meaning:
-
-```
-potential_latent_heat > 0:
-    freezing tendency; cannot freeze more liquid water than available.
-
-potential_latent_heat < 0:
-    thawing/melting tendency; cannot melt more ice than available.
-```
+Physical meaning: positive potential latent heat indicates freezing and cannot
+freeze more liquid water than available. Negative potential latent heat indicates
+thawing or melting and cannot melt more ice than available.
 
 Legacy forms:
 
-```
-freezing:
-    H_limited = min( L_fusion * liquid_water * time_factor,
-                     H_potential )
-
-thawing:
-    H_limited = max(-L_fusion * ice_density_factor * ice_amount * time_factor,
-                     H_potential )
+```math
+\begin{aligned}
+H_{limited} &= \min(L_f W_l\Delta t, H_p), && H_p > 0 \\
+H_{limited} &= \max(-L_f\rho_i I\Delta t, H_p), && H_p < 0
+\end{aligned}
 ```
 
 Sign convention:
 positive H_limited -> freezing, canot freeze more liquid water than available
-negative H_limited -> thawing/melting, cannot melt more ice than available 
+negative H_limited -> thawing/melting, cannot melt more ice than available
 """
 function limit_freeze_thaw_heat(
     potential_latent_heat,
@@ -435,7 +407,7 @@ function limit_freeze_thaw_heat(
     end
 end
 
-"""
+@doc raw"""
 freeze_thaw_water_flux(
 latent_heat_flux;
 latent_heat_fusion = 333.0
@@ -445,8 +417,8 @@ Convert freeze-thaw latent heat flux to liquid-water-equivalent flux.
 
 Legacy form:
 
-```
-water_flux = -H_freeze_thaw / L_fusion
+```math
+F_w = -\frac{H_{freeze-thaw}}{L_f}
 ```
 
 Sign convention:
@@ -458,7 +430,7 @@ freeze_thaw_water_flux(
     latent_heat_fusion = 333.0
     ) = -latent_heat_flux / latent_heat_fusion
 
-"""
+@doc raw"""
 freeze_thaw_limited_fluxes(
 potential_latent_heat,
 liquid_water,
@@ -513,7 +485,7 @@ end
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 snow_solid_water_fractions(
 snow_volume,
 ice_volume;
@@ -525,11 +497,12 @@ Calculate the fractional contribution of snow and ice to total solid water.
 
 Legacy snow thawing uses:
 
-```
-total_solid_water = snow_volume + ice_volume * ice_density_factor
-
-snow_fraction = snow_volume / total_solid_water
-ice_fraction  = ice_volume * ice_density_factor / total_solid_water
+```math
+\begin{aligned}
+W_s &= S + \rho_i I \\
+f_s &= \frac{S}{W_s} \\
+f_i &= \frac{\rho_i I}{W_s}
+\end{aligned}
 ```
 
 These fractions are then used to partition thawing between snow and ice pools.
@@ -561,7 +534,7 @@ function snow_solid_water_fractions(
 
 end
 
-"""
+@doc raw"""
     snow_freeze_thaw_limited_fluxes(
         heat_capacity,
         temperature,
@@ -581,12 +554,17 @@ fluxes for snow and ice pools.
 
 This preserves the legacy snow freeze-thaw logic:
 
-    H_potential = C * (T_freeze - T) / damping * Δt
+```math
+H_p = \frac{C(T_{freeze}-T)}{damping}\Delta t
+```
 
-If H_potential < 0:
+If `H_potential < 0`:
     thawing/melting occurs.
     Melt demand is limited by total solid water:
-        snow_volume + ice_volume * ice_density_factor
+
+```math
+W_s = S + \rho_i I
+```
     The melt flux is partitioned between snow and ice pools.
 
 If H_potential > 0:

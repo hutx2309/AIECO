@@ -22,7 +22,7 @@
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 partition_ground_radiation(
 incoming_radiation,
 surface_fraction;
@@ -33,18 +33,13 @@ Partition incoming radiation to a surface fraction.
 
 Physical form:
 
-```
-R_surface = R_in * f_surface * m
+```math
+R_{surface} = R_{in}f_{surface}m
 ```
 
-where
-
-```
-R_surface = radiation assigned to the surface
-R_in      = incoming shortwave or longwave radiation
-f_surface = active surface fraction
-m         = optional multiplier, e.g. dt_snow or dt_litt
-```
+where `R_{surface}` is radiation assigned to the surface, `R_{in}` is incoming
+shortwave or longwave radiation, `f_{surface}` is the active surface fraction,
+and `m` is an optional multiplier.
 
 This helper is appropriate for partitioning incoming shortwave or incoming
 longwave radiation among snow, bare soil, and litter/residue surfaces.
@@ -79,7 +74,7 @@ end
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
     surface_longwave_coefficients(
         area,
         frac_snowCover,
@@ -101,7 +96,9 @@ snow, soil, and litter surfaces.
 
 Physical form:
 
-    LW_out = ε * σ* * A * f_surface * Δt * T_surface^4
+```math
+LW_{out} = \epsilon\sigma^*Af_{surface}\Delta t\,T_{surface}^4
+```
 
 The returned `*_L` coefficients include `frac_grndRad`, representing the
 open-ground/sky radiation fraction.
@@ -109,7 +106,9 @@ open-ground/sky radiation fraction.
 The returned `*Canpy_L` coefficients do not include `frac_grndRad`; they are
 used later for canopy/standing-dead longwave exchange:
 
-    LW_exchange = K * (T_canopy^4 - T_surface^4) * view_fraction
+```math
+LW_{exchange} = K(T_{canopy}^4 - T_{surface}^4)f_{view}
+```
 """
 function surface_longwave_coefficients(
     area,
@@ -163,7 +162,7 @@ end
 
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 longwave_temperature_exchange(
 coefficient,
 source_temperature,
@@ -175,19 +174,13 @@ Longwave radiation exchange between a radiating source and a receiving surface.
 
 Physical form:
 
-```
-LW_exchange = K_LW * (T_source^4 - T_surface^4) * f_view
+```math
+LW_{exchange} = K_{LW}(T_s^4 - T_r^4)f_{view}
 ```
 
-where
-
-```
-LW_exchange = net longwave energy received by the surface
-K_LW        = longwave exchange coefficient
-T_source    = source temperature in K, e.g. canopy or standing dead
-T_surface   = receiving surface temperature in K
-f_view      = view/radiation partition fraction
-```
+where `LW_{exchange}` is net longwave energy received by the surface, `K_{LW}`
+is the longwave exchange coefficient, `T_s` is source temperature, `T_r` is
+receiving-surface temperature, and `f_{view}` is the view fraction.
 
 Positive value means the receiving surface gains longwave energy.
 Negative value means the receiving surface loses longwave energy to the source.
@@ -208,7 +201,7 @@ end
 # 5. Surface albedo
 
 # -----------------------------------------------------------------------------
-"""
+@doc raw"""
     weighted_surface_albedo(
         component_amounts,
         component_albedos;
@@ -220,7 +213,9 @@ Weighted-average albedo for a mixed surface.
 
 Physical/empirical form:
 
-    α_surface = Σ(αᵢ * amountᵢ) / Σ(amountᵢ)
+```math
+\alpha_{surface} = \frac{\sum_i \alpha_i M_i}{\sum_i M_i}
+```
 
 where each component can be dry soil, dry litter, snow, ice, or liquid water.
 

@@ -19,7 +19,7 @@
 # 1. Interface conductance
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 series_interface_conductance(
 conductance_source,
 conductance_destination,
@@ -32,20 +32,13 @@ Effective interface conductance between two adjacent domains connected in series
 
 Legacy form:
 
-```
-G_interface =
-    2 * G_source * G_destination /
-    (G_source * length_destination + G_destination * length_source)
+```math
+G_{interface} =
+\frac{2G_sG_d}{G_sL_d + G_dL_s}
 ```
 
-where
-
-```
-G_source       = conductance or conductivity-like coefficient in source domain
-G_destination  = conductance or conductivity-like coefficient in destination domain
-length_source  = source-domain path length
-length_destination = destination-domain path length
-```
+where `G_s` and `G_d` are source and destination conductances, and `L_s` and
+`L_d` are source and destination path lengths.
 
 This helper is suitable for thermal conduction, vapor diffusion, and hydraulic
 conductance when the same harmonic/series averaging structure is used.
@@ -82,7 +75,7 @@ end
 # 2. Generic gradient-driven exchange
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 gradient_exchange(
 source_value,
 destination_value,
@@ -96,21 +89,13 @@ Generic exchange amount driven by a difference between two domains.
 
 Physical form:
 
-```
-F = G_interface * (X_source - X_destination) * A * Δt * m
+```math
+F = G_{interface}(X_s - X_d)A\Delta t\,m
 ```
 
-where
-
-```
-F        = exchanged amount over the model substep
-G        = interface conductance
-X_source = source-side potential, temperature, or concentration
-X_destination = destination-side potential, temperature, or concentration
-A        = exchange area
-Δt       = substep time factor
-m        = optional multiplier
-```
+where `F` is the exchanged amount, `G_{interface}` is the interface conductance,
+`X_s - X_d` is the driving gradient, `A` is exchange area, `\Delta t` is the
+substep time factor, and `m` is an optional multiplier.
 
 Sign convention:
 positive F means movement from source to destination.
@@ -136,7 +121,7 @@ end
 # 3. Conductive heat exchange
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 conductive_heat_exchange(
 source_temperature,
 destination_temperature,
@@ -150,20 +135,13 @@ Conductive heat exchange between two adjacent domains.
 
 Physical form:
 
-```
-H = G_T * (T_source - T_destination) * A * Δt * m
+```math
+H = G_T(T_s - T_d)A\Delta t\,m
 ```
 
-where
-
-```
-H      = heat exchanged over the model substep
-G_T    = thermal interface conductance
-T      = temperature in K
-A      = exchange area
-Δt     = substep time factor
-m      = optional multiplier
-```
+where `H` is heat exchanged over the model substep, `G_T` is thermal interface
+conductance, `T_s - T_d` is the temperature difference, `A` is exchange area,
+`\Delta t` is the substep time factor, and `m` is an optional multiplier.
 
 Sign convention:
 positive H means heat moves from source to destination.
@@ -188,7 +166,7 @@ end
 # 4. Diffusive vapor exchange
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 diffusive_vapor_exchange(
 source_vapor_concentration,
 destination_vapor_concentration,
@@ -202,20 +180,14 @@ Diffusive vapor exchange between two adjacent domains.
 
 Physical form:
 
-```
-F_v = G_v * (C_source - C_destination) * A * Δt * m
+```math
+F_v = G_v(C_s - C_d)A\Delta t\,m
 ```
 
-where
-
-```
-F_v = vapor exchanged over the model substep
-G_v = vapor interface conductance or diffusivity-like coefficient
-C   = vapor concentration
-A   = exchange area
-Δt  = substep time factor
-m   = optional multiplier
-```
+where `F_v` is vapor exchanged over the model substep, `G_v` is vapor interface
+conductance or a diffusivity-like coefficient, `C_s - C_d` is the vapor
+concentration difference, `A` is exchange area, `\Delta t` is the substep time
+factor, and `m` is an optional multiplier.
 
 Sign convention:
 positive F_v means vapor moves from source to destination.

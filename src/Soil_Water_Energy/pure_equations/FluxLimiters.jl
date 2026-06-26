@@ -26,7 +26,7 @@
 # 1. One-direction positive flux limiter
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 limit_positive_flux(
 potential_flux,
 source_available,
@@ -35,13 +35,8 @@ destination_capacity
 
 Limit a positive flux from source to destination.
 
-Physical meaning:
-
-```
-q > 0:
-    source loses material/energy
-    destination gains material/energy
-```
+Physical meaning: for `q > 0`, the source loses material or energy and the
+destination gains it.
 
 The actual flux cannot exceed:
 1. the potential positive flux
@@ -50,8 +45,8 @@ The actual flux cannot exceed:
 
 Legacy form:
 
-```
-q_limited = max(0, min(q_potential, source_available, destination_capacity))
+```math
+q_{limited} = \max\left(0, \min(q_{potential}, S_{avail}, D_{cap})\right)
 ```
 
 If potential_flux is negative, this function returns 0.
@@ -75,7 +70,7 @@ end
 # 2. One-direction negative flux limiter
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 limit_negative_flux(
 potential_flux,
 destination_available,
@@ -84,13 +79,8 @@ source_capacity
 
 Limit a negative flux from destination back to source.
 
-Physical meaning:
-
-```
-q < 0:
-    destination loses material/energy
-    source gains material/energy
-```
+Physical meaning: for `q < 0`, the destination loses material or energy and
+the source gains it.
 
 The actual negative flux cannot be more negative than:
 1. the potential negative flux
@@ -99,8 +89,8 @@ The actual negative flux cannot be more negative than:
 
 Legacy form:
 
-```
-q_limited = min(0, max(q_potential, -destination_available, -source_capacity))
+```math
+q_{limited} = \min\left(0, \max(q_{potential}, -D_{avail}, -S_{cap})\right)
 ```
 
 If potential_flux is positive, this function returns 0.
@@ -124,7 +114,7 @@ end
 # 3. Bidirectional storage-capacity limiter
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 limit_bidirectional_flux(
 potential_flux,
 source_available,
@@ -135,29 +125,20 @@ source_capacity
 
 Limit a bidirectional flux using source availability and destination capacity.
 
-Sign convention:
-
-```
-potential_flux > 0:
-    source -> destination
-
-potential_flux < 0:
-    destination -> source
-```
+Sign convention: `potential_flux > 0` moves source to destination;
+`potential_flux < 0` moves destination to source.
 
 For positive flux:
-q_limited = limit_positive_flux(
-potential_flux,
-source_available,
-destination_capacity
-)
+
+```math
+q_{limited} = \operatorname{limit\_positive}(q_p, S_{avail}, D_{cap})
+```
 
 For negative flux:
-q_limited = limit_negative_flux(
-potential_flux,
-destination_available,
-source_capacity
-)
+
+```math
+q_{limited} = \operatorname{limit\_negative}(q_p, D_{avail}, S_{cap})
+```
 
 This helper is useful when the same potential flux can move in either
 direction, such as capillary exchange or vertical soil water redistribution.
@@ -190,7 +171,7 @@ end
 # 5. Evaporation-style negative source limiter
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 limit_negative_flux_by_source(
 potential_flux,
 source_available
@@ -203,8 +184,8 @@ from a storage pool.
 
 Legacy form:
 
-```
-q_limited = max(q_potential, -source_available)
+```math
+q_{limited} = \max(q_{potential}, -S_{avail})
 ```
 
 If potential_flux is positive, this function returns the positive value
@@ -225,7 +206,7 @@ end
 # 7. Fractional removal limiter
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 removable_storage(
 storage,
 removal_fraction
@@ -235,8 +216,8 @@ Calculate the amount of a storage pool removable during a model substep.
 
 Legacy pattern:
 
-```
-removable = max(0, storage * XNPXX)
+```math
+S_{removable} = \max(0, S f_r)
 ```
 
 where XNPXX, XNPAX, etc. represent substep removal fractions.
@@ -250,7 +231,7 @@ function removable_storage(
     return max(0.0, storage * removal_fraction)
 end
 
-"""
+@doc raw"""
 limit_negative_flux_by_fractional_storage(
 potential_flux,
 storage,
@@ -261,8 +242,8 @@ Limit a negative flux by a fraction of available storage.
 
 Legacy form:
 
-```
-q_limited = max(q_potential, -max(0, storage * removal_fraction))
+```math
+q_{limited} = \max\left(q_{potential}, -\max(0, S f_r)\right)
 ```
 
 This is useful for evaporation and vapor-condensation terms.

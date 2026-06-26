@@ -28,15 +28,15 @@
 # 1. Generic storage and fraction helpers
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 air_storage_from_pore_volume(pore_volume, water_storage, ice_storage)
 
 Calculate air-filled storage from pore volume after water and ice occupy space.
 
 Legacy pattern:
 
-```
-air = max(0, pore_volume - water - ice)
+```math
+A_{air} = \max(0, V_p - W - I)
 ```
 
 Inputs:
@@ -55,19 +55,19 @@ function air_storage_from_pore_volume(
     return max(0.0, pore_volume - water_storage - ice_storage)
 end
 
-"""
+@doc raw"""
 storage_fraction(storage, reference_volume; fallback = 0.0, tiny = tiny_num2)
 
 Convert a storage amount to a nonnegative fraction using a reference volume.
 
 Legacy pattern:
 
-```
-if reference_volume > tiny
-    fraction = max(0, storage / reference_volume)
-else
-    fraction = fallback
-end
+```math
+f =
+\begin{cases}
+\max\left(0, \frac{S}{V_{ref}}\right), & V_{ref} > \epsilon \\
+f_{fallback}, & V_{ref} \le \epsilon
+\end{cases}
 ```
 
 This helper should be used for diagnostic water/ice/air fractions, not to
@@ -86,7 +86,7 @@ function storage_fraction(
     end
 end
 
-"""
+@doc raw"""
 storage_fractions_water_ice_air(
 water_storage,
 ice_storage,
@@ -139,7 +139,7 @@ end
 # `surface_air_modifier_from_excess` but it was never defined → UndefVarError at runtime.
 # Formula per the litter_storage_fractions docstring: air_fraction *= max(0, 1 - excess/capacity).
 # Guard capacity > tiny to avoid div-by-zero; degenerate capacity returns 1.0 (no modifier).
-"""
+@doc raw"""
 surface_air_modifier_from_excess(
     excess_surface_water_ice,
     surface_water_holding_capacity;
@@ -148,8 +148,8 @@ surface_air_modifier_from_excess(
 
 Legacy surface-litter air-fraction reduction factor:
 
-```
-modifier = max(0, 1 - excess_surface_water_ice / holding_capacity)
+```math
+m_{air} = \max\left(0, 1 - \frac{W_{excess}}{W_{hold}}\right)
 ```
 
 Returns 1.0 (no reduction) when `holding_capacity <= tiny`.
@@ -167,7 +167,7 @@ function surface_air_modifier_from_excess(
 end
 # CLAUDE DEBUG END
 
-"""
+@doc raw"""
 litter_storage_fractions(
 water,
 ice,
@@ -182,8 +182,8 @@ Calculate surface litter water, ice, and air volume fractions.
 
 The air fraction includes the legacy excess-surface-water reduction factor:
 
-```
-air_fraction *= max(0, 1 - excess_surface_water_ice / holding_capacity)
+```math
+f_{air} \leftarrow f_{air}\max\left(0, 1 - \frac{W_{excess}}{W_{hold}}\right)
 ```
 
 """
@@ -215,7 +215,7 @@ function litter_storage_fractions(
         tiny = tiny
     )
 end
-"""
+@doc raw"""
 soil_storage_fractions(
 micropore_water,
 micropore_ice,
@@ -232,8 +232,8 @@ Calculate diagnostic total soil water, ice, and air fractions.
 
 Legacy denominator:
 
-```
-total_volume = soil_reference_volume + macropore_volume
+```math
+V_{total} = V_{soil} + V_M
 ```
 
 """
@@ -265,12 +265,12 @@ function soil_storage_fractions(
         tiny = tiny
     )
 end
- 
+
 # -----------------------------------------------------------------------------
 # 3. Snow storage update
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 update_snow_layer_storage(
 snow_volume,
 liquid_water,
@@ -291,12 +291,13 @@ Update snow-layer snow, liquid water, ice, and vapor storages.
 
 This preserves the WF10 snow update algebra:
 
-```
-snow += net_snow - freeze_thaw_snow_water + vapor_flux_from_snow
-water += net_water + freeze_thaw_snow_water + freeze_thaw_ice_water
-         + vapor_flux_from_liquid
-ice += net_ice - freeze_thaw_ice_water / ice_density_factor
-vapor += net_vapor - vapor_flux_from_snow - vapor_flux_from_liquid
+```math
+\begin{aligned}
+S' &= S + F_S - F_{ft,S} + F_{v,S} \\
+W' &= W + F_W + F_{ft,S} + F_{ft,I} + F_{v,W} \\
+I' &= I + F_I - \frac{F_{ft,I}}{\rho_i} \\
+V' &= V + F_V - F_{v,S} - F_{v,W}
+\end{aligned}
 ```
 
 Returns:
@@ -352,7 +353,7 @@ function update_snow_layer_storage(
     )
 end
 
-"""
+@doc raw"""
 update_snow_layer_temperature(
 old_heat_capacity,
 old_temperature,
@@ -388,7 +389,7 @@ function update_snow_layer_temperature(
     cpw,
     cpi
     )
-    
+
     new_heat_capacity =
         heat_capacity_snow(
             snow_volume,
@@ -416,12 +417,12 @@ function update_snow_layer_temperature(
     )
 
 end
- 
+
 # -----------------------------------------------------------------------------
 # 5. Surface litter micropore storage update
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 update_litter_micropore_storage(
 water,
 vapor,
@@ -439,11 +440,13 @@ Update surface litter micropore water, vapor, ice, and air storages.
 
 This preserves the WF10 litter storage algebra:
 
-```
-water += liquid_flux + evaporation_flux + freeze_thaw_water_flux + runoff_flux
-vapor += vapor_flux - evaporation_flux
-ice   -= freeze_thaw_water_flux / ice_density_factor
-air    = max(0, pore_volume - water - ice)
+```math
+\begin{aligned}
+W' &= W + F_l + E + F_{ft} + F_r \\
+V' &= V + F_v - E \\
+I' &= I - \frac{F_{ft}}{\rho_i} \\
+A' &= \max(0, V_p - W' - I')
+\end{aligned}
 ```
 
 Notes:
@@ -470,7 +473,7 @@ function update_litter_micropore_storage(
     freeze_thaw_water_flux +
     runoff_flux
 
-    
+
     new_vapor =
         vapor +
         vapor_flux -
@@ -493,10 +496,10 @@ function update_litter_micropore_storage(
         ice = new_ice,
         air = new_air
     )
- 
+
 end
 
-"""
+@doc raw"""
 update_litter_temperature(
 old_heat_capacity,
 old_temperature,
@@ -560,7 +563,7 @@ end
 # 6. Soil micropore and macropore storage update
 # -----------------------------------------------------------------------------
 
-"""
+@doc raw"""
 update_soil_micropore_storage(
 water,
 vapor,
@@ -579,11 +582,13 @@ Update soil micropore water, vapor, ice, and wet-front water.
 
 This preserves the WF10 micropore storage algebra:
 
-```
-water += liquid_flux + evaporation + freeze_thaw + infiltration + subsurface
-vapor += vapor_flux - evaporation
-wet_front += wet_front_flux + infiltration + freeze_thaw + subsurface
-ice -= freeze_thaw / ice_density_factor
+```math
+\begin{aligned}
+W' &= W + F_l + E + F_{ft} + F_{inf} + F_{sub} \\
+V' &= V + F_v - E \\
+W_{front}' &= W_{front} + F_{front} + F_{inf} + F_{ft} + F_{sub} \\
+I' &= I - \frac{F_{ft}}{\rho_i}
+\end{aligned}
 ```
 
 The wet-front flux itself is passed separately as `wet_front_liquid_flux`
@@ -611,7 +616,7 @@ function update_soil_micropore_storage(
     infiltration_flux +
     subsurface_water_flux
 
-    
+
     new_vapor =
         vapor +
         vapor_flux -
@@ -637,11 +642,11 @@ function update_soil_micropore_storage(
         ice = new_ice,
         wet_front_water = new_wet_front_water
     )
-    
+
 
 end
 
-"""
+@doc raw"""
 update_soil_macropore_storage(
 water,
 ice,
@@ -655,9 +660,11 @@ Update soil macropore water and ice.
 
 Legacy algebra:
 
-```
-macropore_water += liquid_flux - infiltration_to_micropore + freeze_thaw
-macropore_ice   -= freeze_thaw / ice_density_factor
+```math
+\begin{aligned}
+W_M' &= W_M + F_l - F_{inf,\mu} + F_{ft} \\
+I_M' &= I_M - \frac{F_{ft}}{\rho_i}
+\end{aligned}
 ```
 
 """
@@ -688,7 +695,7 @@ return (
 
 end
 
-"""
+@doc raw"""
 soil_air_storages(
 micropore_volume,
 macropore_volume,
@@ -739,7 +746,7 @@ function soil_air_storages(
 end
 
 
-"""
+@doc raw"""
 soil_air_porosity(
 air_micropore,
 air_macropore,
@@ -767,7 +774,7 @@ function soil_air_porosity(
     end
 end
 
-"""
+@doc raw"""
 dynamic_macropore_volume(
 base_macropore_volume,
 clay_concentration,
@@ -781,12 +788,8 @@ Calculate dynamic macropore volume after shrink-swell adjustment.
 
 Legacy pattern:
 
-```
-macropore =
-    max(0,
-        base_macropore -
-        FVOLAH * clay * (θ_water - WP) * layer_volume
-    )
+```math
+V_M = \max\left(0, V_{M,0} - F_{VOLAH}C_{clay}(\theta_w - WP)V_{layer}\right)
 ```
 
 If `shrink_swell_coeff = 0`, this returns the base macropore volume.
@@ -809,7 +812,7 @@ function dynamic_macropore_volume(
     )
 end
 
-"""
+@doc raw"""
 macropore_fraction_and_conductivity(
 macropore_volume,
 base_macropore_volume,
@@ -823,9 +826,11 @@ macropore volume changes.
 
 Legacy patterns:
 
-```
-frac_macropore = base_fraction * macropore_volume / base_macropore_volume
-K_macropore = base_K * (macropore_volume / base_macropore_volume)^2
+```math
+\begin{aligned}
+f_M &= f_{M,0}\frac{V_M}{V_{M,0}} \\
+K_M &= K_{M,0}\left(\frac{V_M}{V_{M,0}}\right)^2
+\end{aligned}
 ```
 
 """
@@ -860,7 +865,7 @@ function macropore_fraction_and_conductivity(
     end
 end
 
-"""
+@doc raw"""
 update_soil_temperature(
 old_heat_capacity,
 old_temperature,

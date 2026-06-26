@@ -8,35 +8,43 @@
 #   - not unpack structs
 #   - return values only
 # ============================================================
+@doc raw"""
+    cal_SatVP_conc(T)
+
+Calculate saturated vapor concentration from temperature.
+
+```math
+VP_{sat}(T) =
+\frac{2.173\times10^{-3}}{T}\,0.61\,
+\exp\left[5360\left(3.661\times10^{-3}-\frac{1}{T}\right)\right]
+```
+
+`VP_{sat}` is the saturation vapor concentration in water-equivalent volume
+per air volume. The coefficient `0.61` is the saturation vapor pressure in kPa
+at 0 deg C, and the exponential term is the Clausius-Clapeyron temperature
+response.
 """
 
-Ref: 
 
-vapor presure to vapor density conversion: 
-VP_sat: vapor concentration (m3/m3) at saturation, i.e.,
---5360*(3.661E-03 - 1/T): Clausius–Clapeyron form
---0.61: 0.611 kPa at 0°C
-
-
-"""
-
-
-@inline function cal_SatVP_conc(T) 
+@inline function cal_SatVP_conc(T)
     VP_sat=2.173E-03/T*0.61*exp(5360.0*(3.661E-03-1.0/T))
-    return VP_sat  
+    return VP_sat
 end
 
 
 
 
-"""
+@doc raw"""
     VP_at_psi(TK, ψ)
 
 Calculate equilibrium vapor concentration near a water/soil/litter surface,
 reduced by water potential.
 
 Equation:
-    VP = VP_sat(T) * exp(18 * ψ / (R * T))
+
+```math
+VP(T, \psi) = VP_{sat}(T)\,\exp\left(\frac{18\psi}{RT}\right)
+```
 
 Inputs:
     TK : temperature [K]
@@ -51,12 +59,15 @@ Output:
 end
 
 
-"""
+@doc raw"""
     latent_heat_evaporation(water_flux, latent_heat)
-   
+
 Convert evaporation/condensation water flux to latent heat flux.
 Equation:
-    H_latent = W * Lv
+
+```math
+H_{latent} = W L_v
+```
 Inputs:
     W: evaporation (positive) or condensation (negative) flux [m3]
     Lv: latent heat of vaporization [MJ/m3]
@@ -68,20 +79,23 @@ Positive or negative sign follows the sign of `water_flux`.
 end
 
 
-"""
+@doc raw"""
     advective_heat_water(water_flux, TK, cpw)
 
 Heat carried by liquid water flux.
 
 Equation:
-    H = cpw * T * W
+
+```math
+H = c_{pw} T W
+```
 """
 @inline function advective_heat_water(water_flux::Real, TK::Real, cpw::Real)
     return cpw * TK * water_flux
 end
 
 
-"""
+@doc raw"""
     advective_heat_vapor(vapor_flux, TK, cpw)
 
 Heat carried by moving vapor flux.
@@ -103,10 +117,14 @@ Note:
 end
 
 
-"""
+@doc raw"""
     heat_capacity_snow(snow, water, ice, vapor; cps, cpw, cpi)
 
 Snowpack heat capacity from snow, liquid water, ice, and vapor.
+
+```math
+C_{snow} = c_{ps}S + c_{pw}(W + V) + c_{pi}I
+```
 """
 @inline function heat_capacity_snow(
     snow::Real,
@@ -121,10 +139,14 @@ Snowpack heat capacity from snow, liquid water, ice, and vapor.
 end
 
 
-"""
+@doc raw"""
     heat_capacity_litter(organic_mass, water, vapor, ice; cpo, cpw, cpi)
 
 Surface litter/residue heat capacity.
+
+```math
+C_{litter} = c_{po}M_o + c_{pw}(W + V) + c_{pi}I
+```
 
 `organic_mass` can be surf_SOC + surf_charcoal or another dry organic pool.
 """
@@ -141,11 +163,15 @@ Surface litter/residue heat capacity.
 end
 
 
-"""
+@doc raw"""
     heat_capacity_soil(dry_heat_capacity, water, vapor, ice, water_macro, ice_macro; cpw, cpi)
 
 Soil heat capacity including dry soil, micropore water/vapor/ice,
 and macropore water/ice.
+
+```math
+C_{soil} = C_{dry} + c_{pw}(W_\mu + V_\mu + W_M) + c_{pi}(I_\mu + I_M)
+```
 """
 @inline function heat_capacity_soil(
     dry_heat_capacity::Real,
@@ -163,13 +189,16 @@ and macropore water/ice.
 end
 
 
-"""
+@doc raw"""
     temperature_from_energy(old_heat_capacity, old_temp, net_heat, new_heat_capacity, fallback_temp, min_heat_capacity)
 
 Update temperature from energy balance.
 
 Equation:
-    T_new = (C_old * T_old + H_net) / C_new
+
+```math
+T_{new} = \frac{C_{old}T_{old} + H_{net}}{C_{new}}
+```
 
 If new heat capacity is too small, return fallback temperature.
 """
@@ -189,10 +218,14 @@ If new heat capacity is too small, return fallback temperature.
 end
 
 
-"""
+@doc raw"""
     equilibrium_temperature(C1, T1, C2, T2)
 
 Energy-weighted equilibrium temperature between two connected stores.
+
+```math
+T_{eq} = \frac{C_1T_1 + C_2T_2}{C_1 + C_2}
+```
 """
 @inline function equilibrium_temperature(C1::Real, T1::Real, C2::Real, T2::Real)
     denom = C1 + C2
@@ -200,10 +233,14 @@ Energy-weighted equilibrium temperature between two connected stores.
 end
 
 
-"""
+@doc raw"""
     sensible_heat_limited(T_source, T_equil, heat_capacity, substep_fraction)
 
 Maximum sensible heat exchange needed to move source toward equilibrium.
+
+```math
+H_{sens} = (T_{source} - T_{eq}) C\, f_{step}
+```
 """
 @inline function sensible_heat_limited(
     T_source::Real,
@@ -215,12 +252,16 @@ Maximum sensible heat exchange needed to move source toward equilibrium.
 end
 
 
-"""
+@doc raw"""
     conductive_heat_flux(conductance, T_source, T_dest)
 
 Simple temperature-gradient heat flux.
 
-Positive value means heat moves from source to destination if T_source > T_dest.
+```math
+H = G(T_{source} - T_{dest})
+```
+
+Positive value means heat moves from source to destination if `T_source > T_dest`.
 """
 @inline function conductive_heat_flux(
     conductance::Real,
