@@ -34,10 +34,10 @@ end
 
 check_script_documentation()
 
-# The pure-equation files are still standalone scripts and are not yet included
-# by AiECO. Load each one in an isolated documentation-only module so that its
-# docstrings can be rendered without changing package wiring or causing name
-# collisions between scripts.
+# The Soil_Water_Energy component files are still standalone scripts and are not
+# yet included by AiECO. Load each one in an isolated documentation-only module
+# so that its docstrings can be rendered without changing package wiring or
+# causing name collisions between scripts.
 module ScriptDocs
     module Thermodynamics
         include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "pure_equations", "Thermodynamics.jl"))
@@ -76,6 +76,34 @@ module ScriptDocs
         include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "pure_equations", "StorageUpdates.jl"))
     end
 
+    module ExternalBoundarySurfaceRunoff
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "ExternalBoundarySurfaceRunoff.jl"))
+    end
+
+    module BoundaryUnsaturatedSubsurfaceFlow
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "BoundaryUnsaturatedSubsurfaceFlow.jl"))
+    end
+
+    module LitterSoilCapillaryExchange
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "LitterSoilCapillaryExchange.jl"))
+    end
+
+    module LowerBoundaryConductiveHeat
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "LowerBoundaryConductiveHeat.jl"))
+    end
+
+    module SoilLayerPhaseChange
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilLayerPhaseChange.jl"))
+    end
+
+    module WaterTableBoundaryProcess
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "WaterTableBoundaryProcess.jl"))
+    end
+
+    module SoilPoreDomainExchange
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilPoreDomainExchange.jl"))
+    end
+
 end
 
 const DOCUMENTED_MODULES = [
@@ -87,6 +115,15 @@ const DOCUMENTED_MODULES = [
     ScriptDocs.PhaseChange,
     ScriptDocs.Radiation,
     ScriptDocs.SurfaceExchange,
+    ScriptDocs.BoundaryFluxes,
+    ScriptDocs.StorageUpdates,
+    ScriptDocs.ExternalBoundarySurfaceRunoff,
+    ScriptDocs.BoundaryUnsaturatedSubsurfaceFlow,
+    ScriptDocs.LitterSoilCapillaryExchange,
+    ScriptDocs.LowerBoundaryConductiveHeat,
+    ScriptDocs.SoilLayerPhaseChange,
+    ScriptDocs.WaterTableBoundaryProcess,
+    ScriptDocs.SoilPoreDomainExchange,
 ]
 
 makedocs(
@@ -116,6 +153,15 @@ makedocs(
                     "Boundary Fluxes" => "api/Soil_Water_Energy/pure_equations/BoundaryFluxes.md",
                     "Storage Updates" => "api/Soil_Water_Energy/pure_equations/StorageUpdates.md"
                 ],
+                "Process functions" => [
+                    "External boundary surface runoff" => "api/Soil_Water_Energy/process_functions/ExternalBoundarySurfaceRunoff.md",
+                    "Boundary unsaturated subsurface flow" => "api/Soil_Water_Energy/process_functions/BoundaryUnsaturatedSubsurfaceFlow.md",
+                    "Litter-soil capillary exchange" => "api/Soil_Water_Energy/process_functions/LitterSoilCapillaryExchange.md",
+                    "Lower boundary conductive heat" => "api/Soil_Water_Energy/process_functions/LowerBoundaryConductiveHeat.md",
+                    "Soil layer phase change" => "api/Soil_Water_Energy/process_functions/SoilLayerPhaseChange.md",
+                    "Water table boundary process" => "api/Soil_Water_Energy/process_functions/WaterTableBoundaryProcess.md",
+                    "Soil pore domain exchange" => "api/Soil_Water_Energy/process_functions/SoilPoreDomainExchange.md"
+                ],
             ],
         ],
     ],
@@ -125,4 +171,3 @@ deploydocs(
     repo = "github.com/hutx2309/AIECO.git",
     devbranch = "main",
 )
-

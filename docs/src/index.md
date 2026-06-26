@@ -16,7 +16,9 @@ matching page in the **Script reference** section.
 - `Soil_Water_Energy/pure_equations/` contains non-mutating equations for
   thermodynamics, hydraulics, flux limiting, conductive exchange, phase change,
   radiation, and surface exchange.
+- `Soil_Water_Energy/process_functions/` contains process-level functions that
+  compose the lower-level equations into boundary, phase-change, runoff, and
+  pore-domain exchange calculations.
 
 See [Documenting scripts](@ref) for the required page structure and build
 commands.
-

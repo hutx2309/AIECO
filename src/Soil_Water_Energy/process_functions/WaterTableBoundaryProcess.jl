@@ -27,7 +27,7 @@ This process function represents the physical sequence
 ```math
 \\Delta \\psi_s =
 s_d c_s S L (1 - S_{wt})
-````
+```
 
 where `\\Delta \\psi_s` is the slope-induced pressure adjustment,
 `s_d` is the directional sign, `c_s` is a slope-pressure coefficient,

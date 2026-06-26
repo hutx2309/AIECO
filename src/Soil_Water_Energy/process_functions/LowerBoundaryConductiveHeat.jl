@@ -22,7 +22,7 @@ This process corresponds to the WF9 lower-boundary heat branch:
 
 ```julia
 if (N == 3) && (climateZone != -2)
-````
+```
 
 The lower-boundary thermal conductance is
 
