@@ -112,6 +112,22 @@ module ScriptDocs
         include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilInterlayerVaporDiffusion.jl"))
     end
 
+    module Surf2SoilMacroporeInfiltration
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "Surf2SoilMacroporeInfiltration.jl"))
+    end
+
+    module SurfLittPhaseChange
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SurfLittPhaseChange.jl"))
+    end
+
+    module Surf_ExcessOverlandRunoff
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "Surf_ExcessOverlandRunoff.jl"))
+    end
+
+    module TopSnowpackWindRedistribution
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "TopSnowpackWindRedistribution.jl"))
+    end
+
     module WaterTableBoundaryProcess
         include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "WaterTableBoundaryProcess.jl"))
     end
@@ -142,6 +158,10 @@ const DOCUMENTED_MODULES = [
     ScriptDocs.SoilInterlayerMacroporeFlow,
     ScriptDocs.SoilInterlayerMicroporeFlow,
     ScriptDocs.SoilInterlayerVaporDiffusion,
+    ScriptDocs.Surf2SoilMacroporeInfiltration,
+    ScriptDocs.SurfLittPhaseChange,
+    ScriptDocs.Surf_ExcessOverlandRunoff,
+    ScriptDocs.TopSnowpackWindRedistribution,
     ScriptDocs.WaterTableBoundaryProcess,
     ScriptDocs.SoilPoreDomainExchange,
 ]
@@ -182,6 +202,10 @@ makedocs(
                     "Soil interlayer macropore flow" => "api/Soil_Water_Energy/process_functions/SoilInterlayerMacroporeFlow.md",
                     "Soil interlayer micropore flow" => "api/Soil_Water_Energy/process_functions/SoilInterlayerMicroporeFlow.md",
                     "Soil interlayer vapor diffusion" => "api/Soil_Water_Energy/process_functions/SoilInterlayerVaporDiffusion.md",
+                    "Surface to soil macropore infiltration" => "api/Soil_Water_Energy/process_functions/Surf2SoilMacroporeInfiltration.md",
+                    "Surface-litter phase change" => "api/Soil_Water_Energy/process_functions/SurfLittPhaseChange.md",
+                    "Surface excess overland runoff" => "api/Soil_Water_Energy/process_functions/Surf_ExcessOverlandRunoff.md",
+                    "Top snowpack wind redistribution" => "api/Soil_Water_Energy/process_functions/TopSnowpackWindRedistribution.md",
                     "Soil layer phase change" => "api/Soil_Water_Energy/process_functions/SoilLayerPhaseChange.md",
                     "Water table boundary process" => "api/Soil_Water_Energy/process_functions/WaterTableBoundaryProcess.md",
                     "Soil pore domain exchange" => "api/Soil_Water_Energy/process_functions/SoilPoreDomainExchange.md"
