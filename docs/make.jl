@@ -96,6 +96,22 @@ module ScriptDocs
         include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilLayerPhaseChange.jl"))
     end
 
+    module SoilInterlayerConductiveHeat
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilInterlayerConductiveHeat.jl"))
+    end
+
+    module SoilInterlayerMacroporeFlow
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilInterlayerMacroporeFlow.jl"))
+    end
+
+    module SoilInterlayerMicroporeFlow
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilInterlayerMicroporeFlow.jl"))
+    end
+
+    module SoilInterlayerVaporDiffusion
+        include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "SoilInterlayerVaporDiffusion.jl"))
+    end
+
     module WaterTableBoundaryProcess
         include(joinpath(@__DIR__, "..", "src", "Soil_Water_Energy", "process_functions", "WaterTableBoundaryProcess.jl"))
     end
@@ -122,6 +138,10 @@ const DOCUMENTED_MODULES = [
     ScriptDocs.LitterSoilCapillaryExchange,
     ScriptDocs.LowerBoundaryConductiveHeat,
     ScriptDocs.SoilLayerPhaseChange,
+    ScriptDocs.SoilInterlayerConductiveHeat,
+    ScriptDocs.SoilInterlayerMacroporeFlow,
+    ScriptDocs.SoilInterlayerMicroporeFlow,
+    ScriptDocs.SoilInterlayerVaporDiffusion,
     ScriptDocs.WaterTableBoundaryProcess,
     ScriptDocs.SoilPoreDomainExchange,
 ]
@@ -158,6 +178,10 @@ makedocs(
                     "Boundary unsaturated subsurface flow" => "api/Soil_Water_Energy/process_functions/BoundaryUnsaturatedSubsurfaceFlow.md",
                     "Litter-soil capillary exchange" => "api/Soil_Water_Energy/process_functions/LitterSoilCapillaryExchange.md",
                     "Lower boundary conductive heat" => "api/Soil_Water_Energy/process_functions/LowerBoundaryConductiveHeat.md",
+                    "Soil interlayer conductive heat" => "api/Soil_Water_Energy/process_functions/SoilInterlayerConductiveHeat.md",
+                    "Soil interlayer macropore flow" => "api/Soil_Water_Energy/process_functions/SoilInterlayerMacroporeFlow.md",
+                    "Soil interlayer micropore flow" => "api/Soil_Water_Energy/process_functions/SoilInterlayerMicroporeFlow.md",
+                    "Soil interlayer vapor diffusion" => "api/Soil_Water_Energy/process_functions/SoilInterlayerVaporDiffusion.md",
                     "Soil layer phase change" => "api/Soil_Water_Energy/process_functions/SoilLayerPhaseChange.md",
                     "Water table boundary process" => "api/Soil_Water_Energy/process_functions/WaterTableBoundaryProcess.md",
                     "Soil pore domain exchange" => "api/Soil_Water_Energy/process_functions/SoilPoreDomainExchange.md"
