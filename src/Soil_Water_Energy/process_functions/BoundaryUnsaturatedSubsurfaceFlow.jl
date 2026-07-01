@@ -19,6 +19,12 @@
 Calculate unsaturated subsurface water flow across one boundary face when
 explicit water-table exchange is inactive.
 
+This process corresponds to the legacy WF9 branch
+
+```julia
+if (waterTbl_Flag == 0) || (N == 3)
+````
+
 It calculates:
 
 1. micropore liquid-water boundary flow,

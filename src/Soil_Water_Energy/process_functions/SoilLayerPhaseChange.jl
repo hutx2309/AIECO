@@ -30,7 +30,7 @@ The soil water potential used for freezing-point depression is
 
 ```math
 \psi_f = \psi_m + \psi_o
-```
+````
 
 where `\psi_m` is matric potential and `\psi_o` is osmotic potential.
 

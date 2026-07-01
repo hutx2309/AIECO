@@ -11,6 +11,12 @@
 #   - no direct access to waterVar_copy
 #   - process functions call lower-level pure equations when useful
 # =============================================================================
+
+# CODEX DEBUG BEGIN: keep process outputs at the raw water-flux level so WF9 can apply storage limits before heat transport.
+# Advective heat remains a WF9 calling-site responsibility.
+# CODEX DEBUG END
+
+
 """
     water_table_layer_boundary_exchange(; kwargs...)
 
@@ -21,7 +27,7 @@ This process function represents the physical sequence
 ```math
 \\Delta \\psi_s =
 s_d c_s S L (1 - S_{wt})
-```
+````
 
 where `\\Delta \\psi_s` is the slope-induced pressure adjustment,
 `s_d` is the directional sign, `c_s` is a slope-pressure coefficient,

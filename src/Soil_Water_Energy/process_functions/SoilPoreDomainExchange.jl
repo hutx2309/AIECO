@@ -32,7 +32,7 @@ F^* =
     \ln(r_p / r_m)
 }
 \Delta t
-```
+````
 
 where
 

@@ -30,7 +30,7 @@ The bounded volumetric water contents are
     \theta_{l,\max},
     \max\left(0, \frac{W_l}{V_l}\right)
 \right]
-```
+````
 
 and
 

@@ -29,7 +29,7 @@ The surface runoff depth above free-water retention is
 ```math
 d_w =
 \frac{W_{excess}}{A}
-```
+````
 
 where `W_{excess}` is excess surface water/ice storage and `A` is
 surface area.
