@@ -3,45 +3,48 @@
 \min\left[
     \theta_{l,\max},
     \max\left(0, \frac{W_l}{V_l}\right)
-\right]\]</p><p>and</p><p class="math-container">\[\theta_s =
-\min\left[
-    \phi_s,
-    \max\left(\theta_{s,\min}, \frac{W_s}{V_s}\right)
-\right]\]</p><p>where <code>W_l</code> and <code>W_s</code> are litter and soil water storages, <code>V_l</code> is dry litter volume, <code>V_s</code> is soil reference volume, <code>\theta_{l,\max}</code> is the litter saturation water content, and <code>\phi_s</code> is soil porosity.</p><p>The total water potentials are</p><p class="math-container">\[\Psi_l = \psi_{m,l} + \psi_{g,l} + \psi_{o,l}\]</p><p>and</p><p class="math-container">\[\Psi_s = \psi_{m,s} + \psi_{g,s} + \psi_{o,s}\]</p><p>The litter–soil interface conductance is</p><p class="math-container">\[C_{ls} =
-\frac{2 K_l K_s}{K_l L_s + K_s L_l}\]</p><p>where <code>K_l</code> and <code>K_s</code> are litter and soil hydraulic conductivities, and <code>L_l</code> and <code>L_s</code> are effective flow lengths.</p><p>The potential capillary flux is</p><p class="math-container">\[F^* =
-C_{ls} A f_w (\Psi_l - \Psi_s) \Delta t\]</p><p>where <code>A</code> is exchange area, <code>f_w</code> is the water-covered fraction, and <code>\Delta t</code> is the capillary exchange time factor.</p><p>When the potential flux is near zero, a deadband is applied:</p><p class="math-container">\[F^*_0 =
-\begin{cases}
-0, &amp; |F^*| &lt; \epsilon \\
-F^*, &amp; |F^*| \ge \epsilon
-\end{cases}\]</p><p>The air-entry correction is</p><p class="math-container">\[F_z =
-\begin{cases}
-F^*_0 +
-\min\left[
-    (\theta_l - \theta_{ae,l}) V_l,
-    \max(0, (\theta_{ae,s} - \theta_s) V_s)
-\right] f_r,
-&amp; F^*_0 &gt; 0,\ \theta_l &gt; \theta_{ae,l}
-\\
-F^*_0 +
-\max\left[
-    (\theta_{ae,s} - \theta_s) V_s,
-    \min(0, (\theta_l - \theta_{ae,l}) V_l)
-\right] f_r,
-&amp; F^*_0 &lt; 0,\ \theta_s &gt; \theta_{ae,s}
-\\
-F^*_0,
-&amp; \text{otherwise}
-\end{cases}\]</p><p>The final flux is storage-limited:</p><p class="math-container">\[F =
-\begin{cases}
-\min(F_z, W_l f_r, P_s), &amp; F_z &gt; 0 \\
-\max(F_z, -W_s f_r, -P_l), &amp; F_z &lt; 0
-\end{cases}\]</p><p>where positive flux means litter-to-soil flow, <code>P_l</code> is litter pore capacity, and <code>P_s</code> is soil pore capacity.</p><p>If the soil micropore domain has negative capacity, an additional correction is applied:</p><p class="math-container">\[F \leftarrow F +
-\min\left[
-    0,
-    \max(-W_s f_r, P_{s,raw})
 \right]
-\quad \text{if } P_{s,raw} &lt; 0\]</p><p>The advective heat flux is</p><p class="math-container">\[H_F =
-\begin{cases}
-c_w F T_l, &amp; F &gt; 0 \\
-c_w F T_s, &amp; F &lt; 0
-\end{cases}\]</p><p>implemented by</p><pre><code class="language-julia hljs">advective_heat_by_water_flux(F, T_l, T_s, cpw)</code></pre><p><strong>Sign convention</strong></p><ul><li><code>limited_flux &gt; 0</code>: water moves from surface litter to soil.</li><li><code>limited_flux &lt; 0</code>: water moves from soil to surface litter.</li></ul><p><strong>Returns</strong></p><p>A named tuple containing water contents, potentials, conductance, potential flux, corrected flux, limited flux, heat flux, and updated substep storages.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/hutx2309/AIECO/blob/1469305f7fa8eb3e89afc2e7ba948275d6eb8e58/src/Soil_Water_Energy/process_functions/LitterSoilCapillaryExchange.jl#L16-L166">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../BoundaryUnsaturatedSubsurfaceFlow/">« Boundary unsaturated subsurface flow</a><a class="docs-footer-nextpage" href="../LowerBoundaryConductiveHeat/">Lower boundary conductive heat »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 26 June 2026 16:48">Friday 26 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+````
+
+and
+\]</p><p>math \theta<em>s = \min\left[     \phi</em>s,     \max\left(\theta<em>{s,\min}, \frac{W</em>s}{V_s}\right) \right]</p><pre><code class="language-julia hljs">
+where `W_l` and `W_s` are litter and soil water storages,
+`V_l` is dry litter volume, `V_s` is soil reference volume,
+`\theta_{l,\max}` is the litter saturation water content, and
+`\phi_s` is soil porosity.
+
+The total water potentials are
+</code></pre><p>math \Psi<em>l = \psi</em>{m,l} + \psi<em>{g,l} + \psi</em>{o,l}</p><pre><code class="language-julia hljs">
+and
+</code></pre><p>math \Psi<em>s = \psi</em>{m,s} + \psi<em>{g,s} + \psi</em>{o,s}</p><pre><code class="language-julia hljs">
+The litter--soil interface conductance is
+</code></pre><p>math C<em>{ls} = \frac{2 K</em>l K<em>s}{K</em>l L<em>s + K</em>s L_l}</p><pre><code class="language-julia hljs">
+where `K_l` and `K_s` are litter and soil hydraulic conductivities,
+and `L_l` and `L_s` are effective flow lengths.
+
+The potential capillary flux is
+</code></pre><p>math F^* = C<em>{ls} A f</em>w (\Psi<em>l - \Psi</em>s) \Delta t</p><pre><code class="language-julia hljs">
+where `A` is exchange area, `f_w` is the water-covered fraction, and
+`\Delta t` is the capillary exchange time factor.
+
+When the potential flux is near zero, a deadband is applied:
+</code></pre><p>math F^<em>_0 = \begin{cases} 0, &amp; |F^</em>| &lt; \epsilon \
+F^<em>, &amp; |F^</em>| \ge \epsilon \end{cases}</p><pre><code class="language-julia hljs">
+The air-entry correction is
+</code></pre><p>math F<em>z = \begin{cases} F^*</em>0 + \min\left[     (\theta<em>l - \theta</em>{ae,l}) V<em>l,     \max(0, (\theta</em>{ae,s} - \theta<em>s) V</em>s) \right] f<em>r, &amp; F^*</em>0 &gt; 0,\ \theta<em>l &gt; \theta</em>{ae,l} \
+F^<em><em>0 + \max\left[     (\theta</em>{ae,s} - \theta<em>s) V</em>s,     \min(0, (\theta<em>l - \theta</em>{ae,l}) V<em>l) \right] f</em>r, &amp; F^</em><em>0 &lt; 0,\ \theta</em>s &gt; \theta<em>{ae,s} \
+F^*</em>0, &amp; \text{otherwise} \end{cases}</p><pre><code class="language-julia hljs">
+The final flux is storage-limited:
+</code></pre><p>math F = \begin{cases} \min(F<em>z, W</em>l f<em>r, P</em>s), &amp; F<em>z &gt; 0 \
+\max(F</em>z, -W<em>s f</em>r, -P<em>l), &amp; F</em>z &lt; 0 \end{cases}</p><pre><code class="language-julia hljs">
+where positive flux means litter-to-soil flow, `P_l` is litter pore
+capacity, and `P_s` is soil pore capacity.
+
+If the soil micropore domain has negative capacity, an additional correction
+is applied:
+</code></pre><p>math F \leftarrow F + \min\left[     0,     \max(-W<em>s f</em>r, P<em>{s,raw}) \right] \quad \text{if } P</em>{s,raw} &lt; 0</p><pre><code class="language-julia hljs">
+The advective heat flux is
+</code></pre><p>math H<em>F = \begin{cases} c</em>w F T<em>l, &amp; F &gt; 0 \
+c</em>w F T_s, &amp; F &lt; 0 \end{cases}</p><pre><code class="language-julia hljs">
+implemented by
+</code></pre><p>julia advective<em>heat</em>by<em>water</em>flux(F, T<em>l, T</em>s, cpw) ```</p><p><strong>Sign convention</strong></p><ul><li><code>limited_flux &gt; 0</code>: water moves from surface litter to soil.</li><li><code>limited_flux &lt; 0</code>: water moves from soil to surface litter.</li></ul><p><strong>Returns</strong></p><p>A named tuple containing water contents, potentials, conductance, potential flux, corrected flux, limited flux, heat flux, and updated substep storages.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/hutx2309/AIECO/blob/34fe3c55627b3a5e05661c3a843a462471b7c1fc/src/Soil_Water_Energy/process_functions/LitterSoilCapillaryExchange.jl#L16-L166">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../BoundaryUnsaturatedSubsurfaceFlow/">« Boundary unsaturated subsurface flow</a><a class="docs-footer-nextpage" href="../LowerBoundaryConductiveHeat/">Lower boundary conductive heat »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Wednesday 1 July 2026 17:09">Wednesday 1 July 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
